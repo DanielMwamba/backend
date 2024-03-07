@@ -54,9 +54,10 @@ app.delete("/articles", (req, res) =>{
     const articleIndex = findArticleIndex(id);
     if (articleIndex !== -1) {
       deleteArticles.push(data.splice(articleIndex, 1)[0]);
+      res.status(202).send(deleteArticles);
     }
   });
-  res.status(202).send(deleteArticles);
+
 })
 
 app.get("/articles/:id", (req, res) => {
