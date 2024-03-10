@@ -19,21 +19,32 @@ app.get("/", (req, res) => {
   res.send("L'application fonctionne");
 });
 
+//PAGINATION
+
 app.get("/articles", (req, res) => {
     const page = req.query.page || 1;
-    const pageSize = 5;
+    const pageSize = 11;
     const starIndex = (page - 1) * pageSize;
     const endIndex = page * pageSize;
-    pageArticles = data.slice(starIndex, endIndex);
-  res.json({
-    currentpage: page,
-    perPage: pageSize,
-    totalItems: data.length,
-    totalPages: Math.ceil(data.length / pageSize),
-    articles: pageArticles
+    const pageArticles = data.slice(starIndex, endIndex);
 
-  });
+    if (page <= 20) {
+      return res.json({
+        currentpage: page,
+        perPage: pageSize,
+        totalItems: data.length,
+        totalPages: Math.ceil(data.length / pageSize),
+        articles: pageArticles
+    
+      });
+    } else {
+      res.status(404).send("Cette page n'existe pas")
+    }   
+ 
 });
+
+
+// MODIFIER PARTIELLEMENT UN ARTICLE
 
 app.patch("/articles/:id", (req, res) =>{
   const {id} = req.params;
@@ -47,10 +58,14 @@ app.patch("/articles/:id", (req, res) =>{
   }
 });
 
+
+// SUPPRIMER PLUSIERS ARTICLES
+
+
 app.delete("/articles", (req, res) =>{
-  const idsToDelete = req.body.ids;
+  const elementsToDelete = req.body.select;
   const deleteArticles = [];
-  idsToDelete.forEach(id => {
+  elementsToDelete.forEach(id => {
     const articleIndex = findArticleIndex(id);
     if (articleIndex !== -1) {
       deleteArticles.push(data.splice(articleIndex, 1)[0]);
@@ -59,6 +74,8 @@ app.delete("/articles", (req, res) =>{
   });
 
 })
+
+//TROUVER UN ARTICLE PAR SON ID
 
 app.get("/articles/:id", (req, res) => {
   const { id } = req.params;
@@ -70,6 +87,9 @@ app.get("/articles/:id", (req, res) => {
   res.status(404).send(`L'article avec l'id : ${id} n'existe pas`);
 });
 
+
+// AJOUTER UN ARTICLE
+
 app.post("/articles", (req, res) => {
   const newArticle = req.body;
 
@@ -77,6 +97,10 @@ app.post("/articles", (req, res) => {
 
   res.status(201).send(data[data.length - 1]);
 });
+
+
+// MODIFIER UN ARTICLE
+
 
 app.put("/articles/:id", (req, res) => {
   const article = req.body;
@@ -91,6 +115,9 @@ app.put("/articles/:id", (req, res) => {
   }
 });
 
+
+// SUPPRIMER UN ARTICLE PAR SON ID
+
 app.delete("/articles/:id", (req, res) => {
   const { id } = req.params;
   const articleIndex = findArticleIndex(id);
@@ -102,6 +129,8 @@ app.delete("/articles/:id", (req, res) => {
     res.status(202).send(article); 
   }
 });
+
+// LANCER LE SERVEUR
 
 app.listen(PORT, () => {
   console.log(`Le serveur écoute sur le port ${PORT}`);
